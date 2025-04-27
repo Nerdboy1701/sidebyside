@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SideBySide | NerdVista</title>
+  <meta name="description" content="Combine two images side by side with customizable options. A free tool from NerdVista.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="https://nerdvista.com/Images/Favicon.png" type="image/x-icon">
+  
+  <!-- Fonts - Matching NerdVista's existing font stack -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&family=Roboto&family=Roboto+Mono&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="CSS/styles.css">
+</head>
+<body>
+  <!-- Simplified header with just NerdVista branding -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand">
+        <a href="https://nerdvista.com" class="brand-link">
+          <img src="https://nerdvista.com/Images/NerdVista-logos_1.png" alt="NerdVista" class="logo">
+        </a>
+      </div>
+      <div class="app-name">
+        <h1>SideBySide</h1>
+      </div>
+      <div class="back-link">
+        <a href="https://nerdvista.com" class="return-link">Back to NerdVista</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main app content -->
+  <main class="app-wrapper">
+    <section class="intro-section">
+      <h2>Image Combiner Tool</h2>
+      <p>Create beautiful side-by-side image comparisons with just a few clicks. Perfect for before/after, comparisons, or dual compositions.</p>
+    </section>
+
+    <section class="app-container">
+      <!-- Image upload area -->
+      <div class="upload-section">
+        <div class="upload-area" id="upload-area-1">
+          <div class="upload-placeholder">
+            <div class="upload-icon">+</div>
+            <p>Drag & drop image here</p>
+            <p>or</p>
+            <label for="file-input-1" class="file-label">Choose File</label>
+            <input type="file" id="file-input-1" class="file-input" accept="image/*">
+          </div>
+          <div class="image-preview" id="preview-1"></div>
+        </div>
+        
+        <div class="upload-area" id="upload-area-2">
+          <div class="upload-placeholder">
+            <div class="upload-icon">+</div>
+            <p>Drag & drop image here</p>
+            <p>or</p>
+            <label for="file-input-2" class="file-label">Choose File</label>
+            <input type="file" id="file-input-2" class="file-input" accept="image/*">
+          </div>
+          <div class="image-preview" id="preview-2"></div>
+        </div>
+      </div>
+
+      <!-- Options panel -->
+      <div class="options-panel">
+        <h3>Combination Options</h3>
+        
+        <div class="option-group">
+          <label for="orientation">Orientation:</label>
+          <select id="orientation" class="option-select">
+            <option value="horizontal">Side by Side (Horizontal)</option>
+            <option value="vertical">One Above One Below (Vertical)</option>
+          </select>
+        </div>
+        
+        <div class="option-group">
+          <label for="spacing">Spacing Between Images (px):</label>
+          <input type="range" id="spacing" min="0" max="50" value="10" class="range-slider">
+          <span id="spacing-value">10px</span>
+        </div>
+        
+        <div class="option-group">
+          <label for="background-color">Background Color:</label>
+          <input type="color" id="background-color" value="#ffffff" class="color-picker">
+        </div>
+        
+        <div class="option-group">
+          <label for="resize-option">Image Sizing:</label>
+          <select id="resize-option" class="option-select">
+            <option value="original">Keep Original Size</option>
+            <option value="match-width">Match Width</option>
+            <option value="match-height">Match Height</option>
+            <option value="custom">Custom Size</option>
+          </select>
+        </div>
+        
+        <div class="option-group" id="custom-size-options">
+          <label for="output-width">Output Width (px):</label>
+          <input type="number" id="output-width" value="1200" min="100" class="number-input">
+          
+          <label for="output-height">Output Height (px):</label>
+          <input type="number" id="output-height" value="800" min="100" class="number-input">
+        </div>
+      </div>
+
+      <!-- Preview and download area -->
+      <div class="result-section">
+        <h3>Preview</h3>
+        <div class="preview-container">
+          <canvas id="preview-canvas"></canvas>
+          <div class="preview-placeholder" id="preview-placeholder">
+            <p>Upload two images to see a preview</p>
+          </div>
+        </div>
+        
+        <div class="download-section">
+          <div class="file-options">
+            <label for="file-name">File Name:</label>
+            <input type="text" id="file-name" value="sidebyside" class="text-input">
+            
+            <label for="file-type">File Type:</label>
+            <select id="file-type" class="option-select">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+            </select>
+          </div>
+          
+          <button id="download-button" class="cta-button" disabled>
+            Download Combined Image
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <section class="info-section">
+      <div class="info-card">
+        <h3>Privacy Note</h3>
+        <p>
+          All processing happens in your browser - your images are never uploaded to any server.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Simplified footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-about">
+        <a href="https://nerdvista.com">
+          <img src="https://nerdvista.com/Images/NerdVista-logos_1.png" alt="NerdVista" class="footer-logo">
+        </a>
+        <p>A free tool from NerdVista</p>
+      </div>
+      
+      <div class="footer-links">
+        <h3>More from NerdVista</h3>
+        <ul>
+          <li><a href="https://nerdvista.com">Photography</a></li>
+          <li><a href="https://nerdvista.com/essentials.html">Essentials</a></li>
+          <li><a href="https://nerdvista-shop.square.site/" target="_blank">Print Shop</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 NerdVista. Where Technology Meets Vision.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
