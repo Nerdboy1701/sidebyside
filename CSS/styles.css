@@ -551,3 +551,19 @@
       padding: var(--space-sm);
     }
   }
+
+  .feedback-prompt {
+    margin-top: var(--space-md);
+    text-align: center;
+  }
+  
+  .feedback-link {
+    color: var(--primary-blue);
+    font-weight: bold;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+  }
+  
+  .feedback-link:hover {
+    color: var(--dark-blue);
+  }
