@@ -329,6 +329,7 @@
   }
   
   .range-slider {
+    appearance: none;
     -webkit-appearance: none;
     height: 8px;
     background: var(--secondary-light);
@@ -567,3 +568,319 @@
   .feedback-link:hover {
     color: var(--dark-blue);
   }
+
+  /* ===== COMMON STYLES (ALL SCREEN SIZES) ===== */
+/* Base upload area styles */
+.upload-area {
+  border: 2px dashed var(--primary-blue);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition-standard);
+}
+
+.upload-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  text-align: center;
+  z-index: 1;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: var(--primary-blue);
+  margin-bottom: var(--space-sm);
+}
+
+.image-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-area.has-image .upload-placeholder {
+  display: none;
+}
+
+.upload-area.has-image .image-preview {
+  display: block;
+}
+
+.preview-actions {
+  position: absolute;
+  bottom: var(--space-sm);
+  right: var(--space-sm);
+  display: flex;
+  gap: var(--space-xs);
+  z-index: 3;
+}
+
+.preview-action-btn {
+  background-color: rgba(42, 42, 42, 0.7);
+  color: var(--white);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.preview-action-btn:hover {
+  background-color: var(--primary-blue);
+}
+
+/* ===== DESKTOP STYLES (LARGE SCREENS) ===== */
+@media (min-width: 769px) {
+  .upload-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  .upload-area {
+    flex: 1;
+    min-width: 300px;
+    height: 300px;
+  }
+  
+  .upload-area:hover {
+    border-color: var(--dark-blue);
+    background-color: rgba(80, 101, 168, 0.05);
+  }
+  
+  .preview-container {
+    height: 400px;
+  }
+  
+  /* Desktop-specific preview styles */
+  #preview-canvas {
+    max-height: 400px;
+  }
+}
+
+/* ===== MOBILE STYLES (SMALL SCREENS) ===== */
+@media (max-width: 768px) {
+  .upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  .upload-area {
+    width: 100%;
+    min-height: 200px;
+    margin-bottom: var(--space-sm);
+  }
+  
+  .upload-icon {
+    font-size: 2rem;
+  }
+  
+  .upload-placeholder {
+    padding: var(--space-sm);
+  }
+  
+  .file-label {
+    padding: var(--space-sm) var(--space-lg);
+    margin-top: var(--space-xs);
+  }
+  
+  .preview-action-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Mobile-specific preview styling */
+  .preview-container {
+    height: auto;
+    min-height: 250px;
+  }
+  
+  #preview-canvas {
+    max-height: 350px;
+  }
+  
+  /* Mobile-friendly options panel */
+  .options-panel {
+    padding: var(--space-sm);
+  }
+  
+  .option-group {
+    margin-bottom: var(--space-sm);
+  }
+}
+
+/* ===== TOUCH DEVICE SPECIFIC STYLES ===== */
+@media (pointer: coarse) {
+  /* Hide drag and drop instruction on touch devices */
+  .upload-placeholder p:first-of-type {
+    display: none;
+  }
+  
+  /* Make border solid instead of dashed for touch devices */
+  .upload-area {
+    border-style: solid;
+  }
+  
+  /* Larger touch targets for buttons */
+  .file-label {
+    padding: var(--space-sm) var(--space-lg);
+  }
+  
+  .preview-action-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ===== MOUSE-SPECIFIC STYLES ===== */
+@media (pointer: fine) {
+  .upload-area:hover {
+    border-color: var(--dark-blue);
+    background-color: rgba(80, 101, 168, 0.05);
+  }
+  
+  .file-label:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-2px);
+  }
+}
+
+/* ===== FILE INPUT RESETS ===== */
+.file-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.file-label {
+  display: inline-block;
+  background-color: var(--primary-blue);
+  color: var(--white);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition-standard);
+  margin-top: var(--space-sm);
+  z-index: 5;
+}
+
+/* ===== DRAG OVER STATE ===== */
+.upload-area.drag-over {
+  border-color: var(--primary-blue);
+  background-color: rgba(80, 101, 168, 0.1);
+  transform: scale(1.02);
+}
+
+/* Fix for medium-width screens (tablet and small laptops) */
+@media (min-width: 600px) and (max-width: 991px) {
+  /* Ensure upload areas are visible */
+  .upload-area {
+    display: block !important;
+    width: 100% !important;
+    min-height: 200px !important;
+    height: auto !important;
+    margin-bottom: var(--space-md) !important;
+    border: 2px dashed var(--primary-blue) !important;
+    position: relative !important;
+    overflow: visible !important;
+  }
+  
+  /* Force the upload section to be vertical */
+  .upload-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-md) !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure placeholders are visible */
+  .upload-placeholder {
+    display: flex !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 10 !important;
+  }
+  
+  /* Fix for upload icon */
+  .upload-icon {
+    display: block !important;
+    font-size: 2.5rem !important;
+    margin-bottom: var(--space-sm) !important;
+  }
+  
+  /* Ensure all text is visible */
+  .upload-placeholder p {
+    display: block !important;
+    margin-bottom: var(--space-xs) !important;
+  }
+  
+  /* Make sure "Choose File" button is visible */
+  .file-label {
+    display: inline-block !important;
+    padding: var(--space-sm) var(--space-md) !important;
+    margin-top: var(--space-sm) !important;
+    z-index: 20 !important;
+    position: relative !important;
+  }
+  
+  /* Fix for file inputs */
+  .file-input {
+    position: absolute !important;
+    width: 0.1px !important;
+    height: 0.1px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+  }
+  
+  /* Force visibility for critical elements */
+  .image-preview {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 5 !important;
+  }
+  
+  /* Handle element visibility when image is present */
+  .upload-area.has-image .upload-placeholder {
+    display: none !important;
+  }
+  
+  .upload-area.has-image .image-preview {
+    display: block !important;
+  }
+}
