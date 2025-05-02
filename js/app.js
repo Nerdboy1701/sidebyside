@@ -35,7 +35,23 @@ const SideBySide = {
     // Add mobile support
     this.setupMobileSupport();
     
+    // Add web share setup
+    this.setupWebShare();
+    
+    // Detect mobile devices and add appropriate classes
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      document.body.classList.add('mobile-device');
+      
+      // Improve tap targets for mobile
+      document.querySelectorAll('button, input, select, .file-label').forEach(el => {
+        el.classList.add('mobile-friendly');
+      });
+    }
+    
     console.log('SideBySide initialized!');
+
+    // Add download optimization
+    this.optimizeDownloadProcess();
   },
 
   // Cache DOM elements
@@ -64,6 +80,13 @@ const SideBySide = {
     this.elements.fileName = document.getElementById('file-name');
     this.elements.fileType = document.getElementById('file-type');
     this.elements.downloadButton = document.getElementById('download-button');
+    
+    // Add previewContainer reference
+    this.elements.previewContainer = document.querySelector('.preview-container');
+    
+    // Initialize as null (will be created when needed)
+    this.elements.downloadProgress = null;
+    this.elements.downloadProgressBar = null;
   },
 
   // Setup mobile support - add this new method
@@ -169,6 +192,17 @@ const SideBySide = {
     
     // Initial UI setup
     this.elements.customSizeOptions.style.display = 'none';
+
+    // Add visual feedback for resize option
+    this.elements.resizeOption.addEventListener('change', function() {
+      // Add processing class temporarily
+      this.classList.add('processing');
+      
+      // Remove after transition completes
+      setTimeout(() => {
+        this.classList.remove('processing');
+      }, 300);
+    });
   },
 
   // Set up drag and drop functionality
@@ -218,26 +252,20 @@ const SideBySide = {
 
   // Process the selected file
   handleFile: function(file, imageIndex) {
-    console.log('Processing file:', file);
     if (!file || !file.type.match('image.*')) {
       alert('Please select an image file (JPEG, PNG, GIF, etc.)');
       return;
     }
     
-    // Show loading indicator for mobile
+    // Show processing indicator
     const uploadArea = this.elements[`uploadArea${imageIndex}`];
-    const loadingEl = document.createElement('div');
-    loadingEl.className = 'loading-indicator';
-    loadingEl.innerHTML = 'Loading image...';
-    uploadArea.appendChild(loadingEl);
+    this.showProcessingIndicator(uploadArea, 'Loading image...');
     
     const reader = new FileReader();
     
     reader.onload = (e) => {
-      console.log('FileReader loaded successfully');
       const img = new Image();
       img.onload = () => {
-        console.log('Image loaded successfully for index:', imageIndex);
         // Store image object
         this.images[imageIndex] = img;
         
@@ -245,25 +273,20 @@ const SideBySide = {
         this.updateImagePreview(imageIndex);
         this.updatePreview();
         
-        // Remove loading indicator
-        const indicator = uploadArea.querySelector('.loading-indicator');
-        if (indicator) uploadArea.removeChild(indicator);
+        // Hide processing indicator
+        this.hideProcessingIndicator(uploadArea);
       };
       
-      img.onerror = (err) => {
-        console.error('Image failed to load:', err);
-        const indicator = uploadArea.querySelector('.loading-indicator');
-        if (indicator) uploadArea.removeChild(indicator);
+      img.onerror = () => {
+        this.hideProcessingIndicator(uploadArea);
         alert('Failed to load image. Please try another file.');
       };
       
       img.src = e.target.result;
     };
     
-    reader.onerror = (err) => {
-      console.error('FileReader error:', err);
-      const indicator = uploadArea.querySelector('.loading-indicator');
-      if (indicator) uploadArea.removeChild(indicator);
+    reader.onerror = () => {
+      this.hideProcessingIndicator(uploadArea);
       alert('Error reading file. Please try again.');
     };
     
@@ -329,36 +352,50 @@ const SideBySide = {
       return;
     }
     
-    // Get canvas context
-    const canvas = this.elements.previewCanvas;
-    const ctx = canvas.getContext('2d');
+    // Show processing indicator during rendering
+    this.showProcessingIndicator('.preview-container', 'Generating preview...');
     
-    // Calculate dimensions based on resize option
-    const dimensions = this.calculateDimensions();
-    
-    // Set canvas size
-    canvas.width = dimensions.canvasWidth;
-    canvas.height = dimensions.canvasHeight;
-    
-    // Clear canvas
-    ctx.fillStyle = this.options.backgroundColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw images based on orientation
-    if (this.options.orientation === 'horizontal') {
-      // Side by side
-      ctx.drawImage(this.images[1], dimensions.image1X, dimensions.image1Y, dimensions.image1Width, dimensions.image1Height);
-      ctx.drawImage(this.images[2], dimensions.image2X, dimensions.image2Y, dimensions.image2Width, dimensions.image2Height);
-    } else {
-      // One above one below
-      ctx.drawImage(this.images[1], dimensions.image1X, dimensions.image1Y, dimensions.image1Width, dimensions.image1Height);
-      ctx.drawImage(this.images[2], dimensions.image2X, dimensions.image2Y, dimensions.image2Width, dimensions.image2Height);
-    }
-    
-    // Show preview and enable download
-    this.elements.previewCanvas.style.display = 'block';
-    this.elements.previewPlaceholder.style.display = 'none';
-    this.elements.downloadButton.disabled = false;
+    // Use requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      // Get canvas context
+      const canvas = this.elements.previewCanvas;
+      const ctx = canvas.getContext('2d');
+      
+      // Calculate dimensions based on resize option
+      const dimensions = this.calculateDimensions();
+      
+      // Set canvas size
+      canvas.width = dimensions.canvasWidth;
+      canvas.height = dimensions.canvasHeight;
+      
+      // Clear canvas
+      ctx.fillStyle = this.options.backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw images based on orientation
+      if (this.options.orientation === 'horizontal') {
+        // Side by side
+        ctx.drawImage(this.images[1], dimensions.image1X, dimensions.image1Y, dimensions.image1Width, dimensions.image1Height);
+        ctx.drawImage(this.images[2], dimensions.image2X, dimensions.image2Y, dimensions.image2Width, dimensions.image2Height);
+      } else {
+        // One above one below
+        ctx.drawImage(this.images[1], dimensions.image1X, dimensions.image1Y, dimensions.image1Width, dimensions.image1Height);
+        ctx.drawImage(this.images[2], dimensions.image2X, dimensions.image2Y, dimensions.image2Width, dimensions.image2Height);
+      }
+      
+      // Show preview and enable download
+      this.elements.previewCanvas.style.display = 'block';
+      this.elements.previewPlaceholder.style.display = 'none';
+      this.elements.downloadButton.disabled = false;
+      
+      // Hide processing indicator after rendering
+      this.hideProcessingIndicator('.preview-container');
+
+      // Update share button state along with download button
+      if (this.elements.shareButton) {
+        this.elements.shareButton.disabled = this.elements.downloadButton.disabled;
+      }
+    });
   },
 
   // Calculate dimensions for the combined image
@@ -371,6 +408,40 @@ const SideBySide = {
     let image1Width, image1Height, image2Width, image2Height;
     let canvasWidth, canvasHeight;
     let image1X = 0, image1Y = 0, image2X = 0, image2Y = 0;
+
+    // Check if we're on mobile and using fast quality option
+    if (
+      document.body.classList.contains('mobile-device') && 
+      this.elements.mobileQuality && 
+      this.elements.mobileQuality.value === 'fast'
+    ) {
+      // For smaller images on mobile to improve performance
+      const MAX_SIZE = 1200;
+      
+      if (img1.width > MAX_SIZE || img1.height > MAX_SIZE || 
+          img2.width > MAX_SIZE || img2.height > MAX_SIZE) {
+        
+        console.log('Optimizing image size for mobile');
+        
+        // Scale down large images
+        const scale1 = img1.width > MAX_SIZE || img1.height > MAX_SIZE ? 
+          Math.min(MAX_SIZE / img1.width, MAX_SIZE / img1.height) : 1;
+          
+        const scale2 = img2.width > MAX_SIZE || img2.height > MAX_SIZE ?
+          Math.min(MAX_SIZE / img2.width, MAX_SIZE / img2.height) : 1;
+        
+        // Apply scaling
+        if (scale1 < 1) {
+          img1.width = Math.floor(img1.width * scale1);
+          img1.height = Math.floor(img1.height * scale1);
+        }
+        
+        if (scale2 < 1) {
+          img2.width = Math.floor(img2.width * scale2);
+          img2.height = Math.floor(img2.height * scale2);
+        }
+      }
+    }
     
     // Set dimensions based on resize option
     if (resizeOption === 'original') {
@@ -539,6 +610,9 @@ const SideBySide = {
 
   // Download the combined image
   downloadImage: function() {
+    // Show download progress
+    const progressInterval = this.showDownloadProgress();
+    
     const canvas = this.elements.previewCanvas;
     const fileName = this.options.fileName || 'sidebyside';
     const fileType = this.options.fileType;
@@ -555,18 +629,299 @@ const SideBySide = {
       quality = 0.92; // High quality JPEG
     }
     
-    // Convert canvas to data URL
-    link.href = canvas.toDataURL(mimeType, quality);
+    // Convert canvas to data URL (this can take time for large images)
+    setTimeout(() => {
+      link.href = canvas.toDataURL(mimeType, quality);
+      
+      // Set download filename
+      link.download = `${fileName}.${fileType}`;
+      
+      // Append to body, click and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 100); // Small delay to allow UI update
+  },
+
+  // Show processing indicator
+  showProcessingIndicator: function(parent, message = 'Processing...') {
+    // Remove any existing indicators first
+    this.hideProcessingIndicator(parent);
     
-    // Set download filename
-    link.download = `${fileName}.${fileType}`;
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'processing-indicator';
+    indicator.innerHTML = `<span class="spinner"></span> ${message}`;
     
-    // Append to body, click and remove
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-  
+    // Add to parent element
+    if (typeof parent === 'string') {
+      parent = document.querySelector(parent);
+    }
+    
+    if (parent) {
+      parent.appendChild(indicator);
+      parent.classList.add('processing');
+    } else {
+      // Fallback to preview container
+      this.elements.previewContainer.appendChild(indicator);
+    }
+    
+    return indicator;
+  },
+
+  // Hide processing indicator
+  hideProcessingIndicator: function(parent) {
+    if (typeof parent === 'string') {
+      parent = document.querySelector(parent);
+    }
+    
+    if (parent) {
+      const indicator = parent.querySelector('.processing-indicator');
+      if (indicator) {
+        parent.removeChild(indicator);
+      }
+      parent.classList.remove('processing');
+    } else {
+      // Fallback to remove all indicators
+      document.querySelectorAll('.processing-indicator').forEach(el => {
+        el.parentNode.removeChild(el);
+      });
+      document.querySelectorAll('.processing').forEach(el => {
+        el.classList.remove('processing');
+      });
+    }
+  },
+
+  // Show download progress indicator
+  showDownloadProgress: function() {
+    // Create progress bar if it doesn't exist
+    if (!this.elements.downloadProgress) {
+      const progressContainer = document.createElement('div');
+      progressContainer.className = 'download-progress';
+      progressContainer.innerHTML = '<div class="download-progress-bar"></div>';
+      
+      // Insert after download button
+      this.elements.downloadButton.parentNode.insertBefore(
+        progressContainer, 
+        this.elements.downloadButton.nextSibling
+      );
+      
+      this.elements.downloadProgress = progressContainer;
+      this.elements.downloadProgressBar = progressContainer.querySelector('.download-progress-bar');
+    }
+    
+    // Show and reset progress
+    this.elements.downloadProgress.style.display = 'block';
+    this.elements.downloadProgressBar.style.width = '0%';
+    
+    // Simulate progress (since we can't get actual progress from canvas.toDataURL)
+    this.elements.downloadButton.disabled = true;
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        
+        // Wait a moment at 100% then hide
+        setTimeout(() => {
+          this.hideDownloadProgress();
+        }, 500);
+      }
+      this.elements.downloadProgressBar.style.width = `${progress}%`;
+    }, 200);
+    
+    return interval;
+  },
+
+  // Hide download progress indicator
+  hideDownloadProgress: function() {
+    if (this.elements.downloadProgress) {
+      this.elements.downloadProgress.style.display = 'none';
+      this.elements.downloadButton.disabled = false;
+    }
+  },
+
+  // Web Share API functionality
+  setupWebShare: function() {
+    // Check if Web Share API is supported
+    if (navigator.share) {
+      console.log('Web Share API is supported');
+      
+      // Create share button
+      const shareButton = document.createElement('button');
+      shareButton.className = 'cta-button share-button';
+      shareButton.innerHTML = '<span class="share-icon">↗</span> Share Image';
+      shareButton.style.marginLeft = '10px';
+      
+      // Initially disabled
+      shareButton.disabled = true;
+      
+      // Insert next to download button
+      this.elements.downloadButton.parentNode.insertBefore(
+        shareButton,
+        this.elements.downloadButton.nextSibling
+      );
+      
+      // Store reference
+      this.elements.shareButton = shareButton;
+      
+      // Add click handler
+      shareButton.addEventListener('click', () => this.shareImage());
+    }
+  },
+
+  // Share the combined image
+  shareImage: function() {
+    if (!navigator.share) {
+      console.log('Web Share API not supported');
+      alert('Sharing is not supported on this browser.');
+      return;
+    }
+    
+    // Show processing indicator
+    this.showProcessingIndicator('.preview-container', 'Preparing image for sharing...');
+    
+    const canvas = this.elements.previewCanvas;
+    const fileName = this.options.fileName || 'sidebyside';
+    const fileType = this.options.fileType;
+    
+    // Set file type and quality
+    let mimeType = 'image/png';
+    let quality = 1;
+    
+    if (fileType === 'jpeg') {
+      mimeType = 'image/jpeg';
+      quality = 0.92; // High quality JPEG
+    }
+    
+    // Convert canvas to blob
+    canvas.toBlob(async (blob) => {
+      try {
+        // Create file from blob
+        const file = new File([blob], `${fileName}.${fileType}`, { type: mimeType });
+        
+        // Prepare share data
+        const shareData = {
+          title: 'SideBySide Image',
+          text: 'Created with NerdVista SideBySide',
+          files: [file]
+        };
+        
+        // Check if files are supported
+        if (navigator.canShare && navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          console.log('Image shared successfully');
+        } else {
+          // Fallback to sharing without file
+          await navigator.share({
+            title: 'SideBySide Image',
+            text: 'Check out my side-by-side image created with NerdVista SideBySide: https://sidebyside.nerdvista.com'
+          });
+          console.log('Shared link only (files not supported)');
+        }
+      } catch (error) {
+        console.error('Error sharing: ', error);
+        // Only show error message if it's not an abort
+        if (error.name !== 'AbortError') {
+          alert('Error sharing image: ' + error.message);
+        }
+      } finally {
+        this.hideProcessingIndicator('.preview-container');
+      }
+    }, mimeType, quality);
+  },
+
+  // Image optimization
+  optimizeDownloadProcess: function() {
+    // Use a web worker for better performance, if supported
+    if (window.Worker) {
+      const originalDownloadImage = this.downloadImage;
+      this.downloadImage = function() {
+        // Show download progress
+        const progressInterval = this.showDownloadProgress();
+        this.showProcessingIndicator('.preview-container', 'Preparing download...');
+        
+        const canvas = this.elements.previewCanvas;
+        const fileName = this.options.fileName || 'sidebyside';
+        const fileType = this.options.fileType;
+        
+        // Set file type and quality
+        let mimeType = 'image/png';
+        let quality = 1;
+        
+        if (fileType === 'jpeg') {
+          mimeType = 'image/jpeg';
+          quality = 0.92; // High quality JPEG
+        }
+        
+        // Create a temporary canvas in memory
+        const offscreenCanvas = document.createElement('canvas');
+        offscreenCanvas.width = canvas.width;
+        offscreenCanvas.height = canvas.height;
+        
+        // Copy the content from the main canvas
+        const offscreenCtx = offscreenCanvas.getContext('2d');
+        offscreenCtx.drawImage(canvas, 0, 0);
+        
+        // Convert to blob first (more efficient than dataURL for large images)
+        offscreenCanvas.toBlob((blob) => {
+          // Create object URL from blob
+          const objectURL = URL.createObjectURL(blob);
+          
+          // Create download link
+          const link = document.createElement('a');
+          link.href = objectURL;
+          link.download = `${fileName}.${fileType}`;
+          
+          // Append to body, click and remove
+          document.body.appendChild(link);
+          
+          // Small timeout to ensure UI updates with progress
+          setTimeout(() => {
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(objectURL); // Free up memory
+            
+            this.hideProcessingIndicator('.preview-container');
+          }, 300);
+        }, mimeType, quality);
+      };
+    }
+    
+    // Add option for lowering quality on mobile for better performance
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // Add quality option to the options panel
+      const qualityOption = document.createElement('div');
+      qualityOption.className = 'option-group';
+      qualityOption.innerHTML = `
+        <label for="mobile-quality">Optimize for Mobile:</label>
+        <select id="mobile-quality" class="option-select">
+          <option value="high">High Quality</option>
+          <option value="fast" selected>Fast Download</option>
+        </select>
+      `;
+      
+      // Insert before file options
+      const downloadSection = document.querySelector('.download-section');
+      const fileOptions = document.querySelector('.file-options');
+      if (downloadSection && fileOptions) {
+        downloadSection.insertBefore(qualityOption, fileOptions);
+        
+        // Store reference
+        this.elements.mobileQuality = document.getElementById('mobile-quality');
+        
+        // Update options based on selection
+        this.elements.mobileQuality?.addEventListener('change', () => {
+          this.updatePreview();
+        });
+      }
+    }
+  },
+
 };
 
 // Initialize the app when the DOM is ready

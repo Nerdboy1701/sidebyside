@@ -532,4 +532,142 @@
   }
 }
   
+/* Processing indicator */
+.processing-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(42, 42, 42, 0.85);
+  color: white;
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+  font-family: var(--body-font);
+  font-size: 0.95rem;
+}
+
+/* Spinner animation */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--white);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Improve feedback for active UI elements */
+.file-label:active,
+.cta-button:active {
+  transform: scale(0.98);
+}
+
+/* Add visual feedback when image processing is happening */
+.upload-area.processing {
+  border-color: var(--primary-blue);
+  background-color: rgba(80, 101, 168, 0.1);
+}
+
+/* Feedback when match shape is processing */
+.option-select.processing,
+.range-slider.processing {
+  box-shadow: 0 0 0 2px rgba(80, 101, 168, 0.4);
+}
+
+/* Add a progress bar style for download feedback */
+.download-progress {
+  width: 100%;
+  height: 4px;
+  background-color: var(--secondary-light);
+  border-radius: 2px;
+  margin-top: 5px;
+  overflow: hidden;
+  display: none;
+}
+
+.download-progress-bar {
+  height: 100%;
+  background-color: var(--primary-blue);
+  width: 0%;
+  transition: width 0.3s ease;
+}  
+
+/* Share Button Styles */
+.share-button {
+  background-color: #4285F4;
+  margin-left: 10px;
+}
+
+.share-button:hover:not(:disabled) {
+  background-color: #2D6EDF;
+}
+
+.share-icon {
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+
+/* Mobile optimizations */
+.mobile-device .cta-button,
+.mobile-device .file-label,
+.mobile-device input,
+.mobile-device select,
+.mobile-device .mobile-friendly {
+  min-height: 44px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.mobile-device .option-group {
+  margin-bottom: 18px;
+}
+
+/* Downloadable/shareable images handling */
+.mobile-device .download-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.mobile-device .file-options {
+  width: 100%;
+}
+
+.mobile-device .cta-button {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Better touch feedback */
+.mobile-device .cta-button:active,
+.mobile-device .file-label:active,
+.mobile-device .upload-area:active {
+  opacity: 0.85;
+}
+
+/* Adjust spacing for mobile */
+@media (max-width: 768px) {
+  .share-button {
+    margin-left: 0;
+    margin-top: var(--space-sm);
+  }
   
+  .download-section {
+    flex-direction: column;
+  }
+  
+  .cta-button {
+    width: 100%;
+  }
+}
