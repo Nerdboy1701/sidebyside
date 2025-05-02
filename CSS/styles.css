@@ -604,12 +604,12 @@
 
 /* Share Button Styles */
 .share-button {
-  background-color: #4285F4;
+  background-color: var(--dark-blue);
   margin-left: 10px;
 }
 
 .share-button:hover:not(:disabled) {
-  background-color: #2D6EDF;
+  background-color: var(--primary-blue);
 }
 
 .share-icon {
